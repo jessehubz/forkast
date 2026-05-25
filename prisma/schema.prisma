@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Profile {
+  id          String   @id
+  role        String
+  name        String
+  email       String
+  noShowCount Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+model Restaurant {
+  id           String        @id @default(cuid())
+  ownerId      String
+  name         String
+  description  String
+  address      String
+  cuisine      String
+  coverImage   String?
+  tables       Table[]
+  reservations Reservation[]
+  waitlists    Waitlist[]
+  createdAt    DateTime      @default(now())
+}
+
+model Table {
+  id           String        @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant    @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  label        String
+  seats        Int
+  x            Float
+  y            Float
+  reservations Reservation[]
+}
+
+model Reservation {
+  id            String     @id @default(cuid())
+  restaurantId  String
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id])
+  tableId       String
+  table         Table      @relation(fields: [tableId], references: [id])
+  dinerId       String
+  dinerName     String
+  partySize     Int
+  date          DateTime
+  status        String     @default("confirmed")
+  depositAmount Float      @default(0)
+  depositPaid   Boolean    @default(false)
+  notes         String?
+  createdAt     DateTime   @default(now())
+}
+
+model Waitlist {
+  id           String     @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  dinerId      String
+  dinerName    String
+  partySize    Int
+  date         DateTime
+  notified     Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+}
+
+model ReservationHistory {
+  id             String   @id @default(cuid())
+  dinerId        String
+  restaurantId   String
+  restaurantName String
+  date           DateTime
+  partySize      Int
+  status         String
+}
